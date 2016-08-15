@@ -1,15 +1,15 @@
-from flask import Flask, g
-
+import math
 import sys
 import os
-from ..util.helpers import get_logger, mkdir, confirm, str_format
-import itertools as it
-from ..util.args import get_last_cmd_executed
-from ..db import Base
-from .. import __version__
-import math
-# from concurrent import futures
+
 from datetime import datetime
+from flask import Flask
+from itertools import ifilter
+
+from .. import __version__
+from ..db import Base
+from ..util.args import get_last_cmd_executed
+from ..util.helpers import confirm
 
 
 def default_get_submit_args(task, default_queue=None, parallel_env='orte'):
@@ -202,7 +202,7 @@ class Cosmos(object):
                 for t in failed_tasks:
                     session.delete(t)
 
-            for stage in it.ifilter(lambda s: len(s.tasks) == 0, wf.stages):
+            for stage in ifilter(lambda s: len(s.tasks) == 0, wf.stages):
                 wf.log.info('Deleting stage %s, since it has 0 successful Tasks' % stage)
                 session.delete(stage)
 
