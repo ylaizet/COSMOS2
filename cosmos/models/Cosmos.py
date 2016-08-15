@@ -101,7 +101,10 @@ class Cosmos(object):
         from sqlalchemy.orm import sessionmaker, scoped_session
         from sqlalchemy.ext.declarative import declarative_base
 
-        engine = create_engine(database_url, convert_unicode=True)
+        engine = create_engine(database_url,
+                               convert_unicode=True,
+                               pool_recycle=3600)
+
         self.session = scoped_session(sessionmaker(autocommit=False,
                                                    autoflush=False,
                                                    bind=engine))
