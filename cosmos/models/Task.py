@@ -6,7 +6,7 @@ import subprocess as sp
 from sqlalchemy.orm import relationship, synonym, backref
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
-from sqlalchemy.types import Boolean, Integer, String, DateTime, BigInteger
+from sqlalchemy.types import Boolean, Integer, String, DateTime, Unicode
 from flask import url_for
 from networkx.algorithms import breadth_first_search
 
@@ -188,7 +188,7 @@ class Task(Base):
     # command = Column(Text)
 
     drm_native_specification = Column(String(255))
-    drm_jobID = Column(String(255))
+    drm_jobID = Column(Unicode(255, convert_unicode=True))
 
     profile_fields = ['wall_time', 'cpu_time', 'percent_cpu', 'user_time', 'system_time', 'io_read_count',
                       'io_write_count', 'io_read_kb', 'io_write_kb',
