@@ -248,7 +248,8 @@ class Workflow(Base):
 
     def run(self, max_cores=None, max_attempts=1, dry=False, set_successful=True,
             cmd_wrapper=signature.default_cmd_fxn_wrapper,
-            log_out_dir_func=default_task_log_output_dir):
+            log_out_dir_func=default_task_log_output_dir,
+            trap_ge_notification_signals=False):
         """
         Runs this Workflow's DAG
 
@@ -347,7 +348,7 @@ class Workflow(Base):
         self.log.info('Skipping %s successful tasks...' % len(successful))
         task_queue.remove_nodes_from(successful)
 
-        handle_exits(self)
+        trap_signals(self, trap_ge_notification_signals=trap_ge_notification_signals)
 
         # self.log.info('Checking stage status...')
 
@@ -566,15 +567,21 @@ def _process_finished_tasks(jobmanager):
             yield task
 
 
-def handle_exits(workflow, do_atexit=True):
-    # terminate on ctrl+c
-    def ctrl_c(signal, frame):
-        if not workflow.successful:
-            workflow.log.info('Caught SIGINT (ctrl+c)')
-            workflow.terminate(due_to_failure=False)
-            raise SystemExit('Workflow terminated with a SIGINT (ctrl+c) event')
+def trap_signals(workflow, do_atexit=True, trap_ge_notification_signals=False):
 
-    signal.signal(signal.SIGINT, ctrl_c)
+    def terminate_workflow(signal_id, frame):
+        if not workflow.successful:
+            workflow.log.info('Caught signal %s: terminating workflow' % signal_id)
+            workflow.terminate(due_to_failure=False)
+            raise SystemExit('Caught signal %s: terminated workflow' % signal_id)
+
+    signal.signal(signal.SIGINT, terminate_workflow)         # handle control-c
+
+    if trap_ge_notification_signals:
+        # SGE may send a SIGXCPU before a SIGKILL when resources are exceeded
+        signal.signal(signal.SIGXCPU, terminate_workflow)
+        # SGE may send a SIGUSR2 before a SIGKILL when qdel is called
+        signal.signal(signal.SIGUSR2, terminate_workflow)
 
     if do_atexit:
         @atexit.register
