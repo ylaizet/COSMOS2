@@ -19,9 +19,8 @@ class DRM_GE(DRM):
                 os.unlink(p)
 
         ns = ' ' + task.drm_native_specification if task.drm_native_specification else ''
-        qsub = 'qsub -o {stdout} -e {stderr} -b y -cwd -S /bin/bash -V{ns} '.format(stdout=task.output_stdout_path,
-                                                                                    stderr=task.output_stderr_path,
-                                                                                    ns=ns)
+        qsub = 'qsub -notify -o {stdout} -e {stderr} -b y -cwd -S /bin/bash -V{ns} '.format(
+            stdout=task.output_stdout_path, stderr=task.output_stderr_path, ns=ns)
 
         out = sp.check_output('{qsub} "{cmd_str}"'.format(cmd_str=task.output_command_script_path, qsub=qsub),
                               env=os.environ, preexec_fn=preexec_function, shell=True)
