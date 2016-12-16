@@ -571,9 +571,9 @@ def trap_signals(workflow, do_atexit=True, trap_ge_notification_signals=False):
 
     def terminate_workflow(signal_id, frame):
         if not workflow.successful:
-            workflow.log.info('Caught signal %s: terminating workflow' % signal_id)
+            workflow.log.info('Caught signal %s' % signal_id)
             workflow.terminate(due_to_failure=False)
-            raise SystemExit('Caught signal %s: terminated workflow' % signal_id)
+            sys.exit('Finished handling signal %s: exiting cleanly' % signal_id)
 
     signal.signal(signal.SIGINT, terminate_workflow)         # handle control-c
 
@@ -589,7 +589,6 @@ def trap_signals(workflow, do_atexit=True, trap_ge_notification_signals=False):
             if workflow.status == WorkflowStatus.running:
                 workflow.log.error('Workflow %s has a status of running atexit!' % workflow)
                 workflow.terminate(due_to_failure=True)
-                # raise SystemExit('Workflow terminated due to the python interpreter exiting')
 
 
 def _copy_graph(graph):
