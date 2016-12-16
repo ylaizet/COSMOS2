@@ -153,7 +153,8 @@ class DRM_GE(DRM):
         for group in grouper(50, tasks):
             group = filter(lambda x: x is not None, group)
             pids = ','.join(map(lambda t: unicode(t.drm_jobID), group))
-            sp.Popen(['qdel', pids], preexec_fn=preexec_function)
+            sp.call(['qdel', pids], preexec_fn=preexec_function)
+            group[0].workflow.log.info("called qdel on %d jobs" % len(group))
 
 
 def _is_corrupt(qacct_dict):
