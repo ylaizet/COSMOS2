@@ -569,11 +569,13 @@ def _process_finished_tasks(jobmanager):
 
 def trap_signals(workflow, do_atexit=True, trap_ge_notification_signals=False):
 
-    def terminate_workflow(signal_id, frame):
+    def terminate_workflow(signal_id, _):
         if not workflow.successful:
-            workflow.log.info('Caught signal %s' % signal_id)
+            workflow.log.info('Caught signal %s: terminating workflow' % signal_id)
             workflow.terminate(due_to_failure=False)
-            sys.exit('Finished handling signal %s: exiting cleanly' % signal_id)
+            last_words = 'Finished handling signal %s: exiting cleanly' % signal_id
+            workflow.log.info(last_words)
+            sys.exit(last_words)
 
     signal.signal(signal.SIGINT, terminate_workflow)         # handle control-c
 
